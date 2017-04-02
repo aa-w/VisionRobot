@@ -1,0 +1,15 @@
+
+OpenUltrasonic(SENSOR_4);
+
+ultrasonicVal = zeros(1,50);
+
+while 1
+    ultrasonicVal = [ultrasonicVal(2:end), GetUltrasonic(SENSOR_4)];
+    plot(ultrasonicVal);
+    ylim([0 255]);
+    pause(.1);
+    end
+
+CloseSensor(SENSOR_4);
+
+COM_CloseNXT(COM_GetDefaultNXT());
