@@ -62,7 +62,11 @@ while(cam.FramesAcquired <= 50)
         
         plot(bcr(2),'-m+')
         
+        RedBoxcount = RedBoxcount + 1;
+        
     end %%for loop close
+    
+    disp(RedBoxcount); %%Displays the amount fo red elements drawn
     
     for object = 1:length(blueregions)
         
@@ -88,9 +92,11 @@ while(cam.FramesAcquired <= 50)
     
     hold off
     RedBoxcount = 0;
+
 end %%while loop ended
 
 stop(cam);
 
 flushdata(cam); %%clears cam data from memory
+
 
