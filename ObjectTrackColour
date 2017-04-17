@@ -32,9 +32,9 @@ while(cam.FramesAcquired <= 50)
     bluediff = im2bw(bluediff,0.18);
     greendiff = im2bw(greendiff,0.18);
     
-    reddiff = bwareaopen(reddiff,300); %%gets rid of all pixles less than 300px to make it easier to recgonise
-    bluediff = bwareaopen(bluediff,300);
-    greendiff = bwareaopen(greendiff,300);
+    reddiff = bwareaopen(reddiff,200); %%gets rid of all pixles less than 300px to make it easier to recgonise
+    bluediff = bwareaopen(bluediff,200);
+    greendiff = bwareaopen(greendiff,200);
     
     %%create different image types
     bwr = bwlabel(reddiff,8);
@@ -46,8 +46,8 @@ while(cam.FramesAcquired <= 50)
     blueregions = regionprops(bwb,'BoundingBox','Centroid');
     greenregions = regionprops(bwg,'BoundingBox','Centroid');
     
-    %%imshow(imagesnapshot); %%displays background image for debugging - just basic capture for overlay
-    imshow(cam);
+    imshow(imagesnapshot); %%displays background image for debugging - just basic capture for overlay
+    %%imshow(cam);
     
     hold on
     
