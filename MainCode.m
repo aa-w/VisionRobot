@@ -3,7 +3,10 @@ cam = videoinput('winvideo', 1,'YUY2_320x240');
 RedBoxcount = int32(0);
 
 %%Button Logic - Current code from matlab
+global closevalue;
+
 h = figure;
+closevalue = int32(0);
 stopbutton = uicontrol('Parent',h,'Style','pushbutton','String','First button','Units','normalized','Position',[0.2 0.2 0.4 0.2]);
 set(stopbutton,'Callback',@stopfunction);
 
@@ -97,16 +100,23 @@ while(cam.FramesAcquired <= 50)
     
     hold off
     RedBoxcount = 0;
+    
+    if (closevalue == 1)
+        
+        stop(cam);
+        flushdata(cam); %%clears cam data from memory
+        exit
+        
+    end
 end %%while loop ended
 
 stop(cam);
 
 flushdata(cam); %%clears cam data from memory
 
-function stopfunction(cam,~)
+function stopfunction(~,~)
+        closevalue = 1;
         
-        stop(cam);
-        flushdata(cam); %%clears cam data from memory
-        exit
 end
+
 
