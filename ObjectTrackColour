@@ -2,6 +2,9 @@ cam = videoinput('winvideo', 1,'YUY2_320x240');
 
 RedBoxcount = int32(0);
 
+%%Button Logic - Current code from matlab
+pb = uicontrol('Style','pushbutton','Callback',@pushbutton1_Callback);
+
 triggerconfig(cam,'manual'); %%sets the Frames Per Trigger function to higher frame rate
 
 set(cam,'TimerPeriod',0.1);
@@ -62,7 +65,11 @@ while(cam.FramesAcquired <= 50)
         
         plot(bcr(2),'-m+')
         
+        RedBoxcount = RedBoxcount + 1;
+        
     end %%for loop close
+    
+    disp(RedBoxcount); %%Displays the amount fo red elements drawn
     
     for object = 1:length(blueregions)
         
@@ -93,4 +100,10 @@ end %%while loop ended
 stop(cam);
 
 flushdata(cam); %%clears cam data from memory
+
+function pushbutton1_Callback()
+        
+        stop(cam);
+        flushdata(cam); %%clears cam data from memory
+end
 
