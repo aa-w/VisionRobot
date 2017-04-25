@@ -1,6 +1,7 @@
 cam = videoinput('winvideo', 1,'YUY2_320x240'); 
 
 RedBoxcount = int32(0);
+IsFinished = false;
 
 triggerconfig(cam,'manual'); %%sets the Frames Per Trigger function to higher frame rate
 
@@ -17,13 +18,13 @@ cam.FrameGrabInterval = 5; %%an image is grabbed every 5 from the webcam
 
 start(cam); %%grabs cam feed
 
-while(cam.FramesAcquired <= 50)
+while(IsFinished == false)
     imagesnapshot = getsnapshot(cam); %%object stores data
     
     %%image processing
-    reddiff = imsubtract(imagesnapshot(:,:,1),rgb2gray(imagesnapshot)); %%subtracts all red
-    greendiff = imsubtract(imagesnapshot(:,:,2),rgb2gray(imagesnapshot)); %%subtracts all green
-    bluediff = imsubtract(imagesnapshot(:,:,3),rgb2gray(imagesnapshot)); %%subtracts all blue
+    reddiff = imsubtract(imagesnapshot(175,54,60),rgb2gray(imagesnapshot)); %%subtracts all red
+    greendiff = imsubtract(imagesnapshot(70,148,73),rgb2gray(imagesnapshot)); %%subtracts all green
+    bluediff = imsubtract(imagesnapshot(56,61,150),rgb2gray(imagesnapshot)); %%subtracts all blue
 
     
     reddiff = medfilt2(reddiff,[3,3]); %%
@@ -63,7 +64,7 @@ while(cam.FramesAcquired <= 50)
         plot(bcr(2),'-m+')
         
         RedBoxcount = RedBoxcount + 1;
-        
+        disp(bbr);
     end %%for loop close
     
     disp(RedBoxcount); %%Displays the amount fo red elements drawn
