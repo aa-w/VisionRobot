@@ -1,31 +1,17 @@
 %%start set up code
-cam = videoinput('winvideo', 1,'YUY2_320x240'); 
-
 RedBoxcount = int32(0);
 IsFinished = false;
-triggerconfig(cam,'manual'); %%sets the Frames Per Trigger function to higher frame rate
-set(cam,'TimerPeriod',0.1);
-set(cam,'FramesPerTrigger',Inf);
+
+
 %%set(cam,'TimerFcn',@SetVideoObject);
 MazeComplete = false;
 
-
-figure,imshow(uint8(zeros(240, 320, 3)));
-
-set(cam,'ReturnedColorspace','rgb')
-cam.FrameGrabInterval = 5; %%an image is grabbed every 5 from the webcam
-
-start(cam); %%grabs cam feed
-
 while(MazeComplete == false)
     
+%%run the function once to get a frame
 
+%%create objects from get frame using the marker class :D
 
 %%is complete end loop
 end
-stop(cam);
-
-flushdata(cam); %%clears cam data from memory
-flushdata(cam); %%clears cam data from memory
-
 
