@@ -2,9 +2,25 @@ function [ output_args ] = GetFrame( input_args )
 %GETFRAME Summary of this function goes here
 %   Detailed explanation goes here
 
-    imagesnapshot = getsnapshot(cam); %%object stores data
+    cam = videoinput('winvideo', 1,'YUY2_320x240'); 
+
+    triggerconfig(cam,'manual'); %%sets the Frames Per Trigger function to higher frame rate
     
+    set(cam,'TimerPeriod',0.1);
+    
+    set(cam,'FramesPerTrigger',Inf);
+    
+    figure,imshow(uint8(zeros(240, 320, 3)));
+
+    set(cam,'ReturnedColorspace','rgb');
+    cam.FrameGrabInterval = 5; %%an image is grabbed every 5 from the webcam
+
+    start(cam); %%grabs cam feed
+
     RedBoxcount = 0;
+    
+    %%this is where the while loop used too be
+    imagesnapshot = getsnapshot(cam); %%object stores data
     
     %%image processing
     reddiff = imsubtract(imagesnapshot(:,:,1),rgb2gray(imagesnapshot)); %%subtracts all red
@@ -79,6 +95,9 @@ function [ output_args ] = GetFrame( input_args )
     
     disp('Red Objects:');
     disp(RedBoxcount);
+    
+    stop(cam);
+    flushdata(cam); %%clears cam data from memory
 
 end
 
