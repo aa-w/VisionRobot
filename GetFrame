@@ -1,4 +1,4 @@
-function [ output_args ] = GetFrame( input_args )
+function [MarkerPosArray] = GetFrame(MarkerPosArray)
 %GETFRAME Summary of this function goes here
 %   Detailed explanation goes here
 
@@ -63,8 +63,10 @@ function [ output_args ] = GetFrame( input_args )
         
         plot(bcr(2),'-m+')
         
+        MarkerPosArray = [MarkerPosArray, bbr]; %%consider preallocating size
         RedBoxcount = RedBoxcount + 1;
         disp(bbr);
+        
     end %%for loop close
     
     disp(RedBoxcount); %%Displays the amount fo red elements drawn
