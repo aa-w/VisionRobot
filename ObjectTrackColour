@@ -10,18 +10,57 @@ while(MazeComplete == false)
     
 %%run the function once to get a frame
 [MarkerPosArray] = GetFrame(MarkerPosArray);
-objectcreate = size(MarkerPosArray);
 
-while(objectcreate ~= 0)
+global markertracker; %%global red object size
+markertracker = size(MarkerPosArray); %%transfer size count from the array
+
+objectcreate = markertracker;
+
+while(objectcreate ~= 0) %%consdier simplyifing
     
-    objnamevar = num2str(objectcreate);
     
-    RedMarker{objnamevar} = Marker; %%creates marker of the position 
-    RedMarker{objnamevar}.Coords = MarkerPosArray(objectcreate); %%Sets the binds the coord to the array to the create created class element
-    disp(RedMarker{objnamevar}.Coords);
-    objectcreate = objectcreate - 1; %%decreases the object total
+    namecreate = num2str(objectcreate); %%concats the string to make names
+    %%dumb fix for this section
+    RedMarker1 = Marker;
+    RedMarker2 = Marker;
+    RedMarker3 = Marker;
+    RedMarker4 = Marker;
+    RedMarker5 = Marker;
+    RedMarker6 = Marker;
+    RedMarker7 = Marker;
+    RedMarker8 = Marker;
+    RedMarker9 = Marker;
+    RedMarker10 = Marker;
+    RedMarker11 = Marker;
+    %%This is ugly and I hate it
+    RedMarker1.Coords = MarkerPosArray(objectcreate); %%Sets the binds the coord to the array to the create created class element
+    RedMarker2.Coords = MarkerPosArray(objectcreate);
+    RedMarker3.Coords = MarkerPosArray(objectcreate);
+    RedMarker4.Coords = MarkerPosArray(objectcreate);
+    RedMarker5.Coords = MarkerPosArray(objectcreate);
+    RedMarker6.Coords = MarkerPosArray(objectcreate);
+    RedMarker7.Coords = MarkerPosArray(objectcreate);
+    RedMarker8.Coords = MarkerPosArray(objectcreate);
+    RedMarker9.Coords = MarkerPosArray(objectcreate);
+    RedMarker10.Coords = MarkerPosArray(objectcreate);
+    RedMarker11.Coords = MarkerPosArray(objectcreate);
+    
+    %%Redmarker{objectcreate} = namecreate([1:2, 2:end]);
+    
+    disp(namecreate);
+
+    objectcreate = objectcreate - 1; %%decreases the object total matlab does not support shorthand
 end
+%%finding the left most marker
 
+LoopVal = markertracker; %%copy of marker tracker for decrement loop value
+smallestMarker = strcat('Redmarker', num2str(LoopVal));
+while(LoopVal ~= 0)
+
+    if (smallestMarker.Coords > 0)
+    end %%test set up
+
+end
 %%create objects from get frame using the marker class :D
 MazeComplete = true; %%test
 %%is complete end loop
