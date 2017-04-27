@@ -1,7 +1,7 @@
 %%start set up code
 RedBoxcount = int32(0);
 IsFinished = false;
-
+MarkerPosArray = {};
 
 %%set(cam,'TimerFcn',@SetVideoObject);
 MazeComplete = false;
@@ -9,9 +9,21 @@ MazeComplete = false;
 while(MazeComplete == false)
     
 %%run the function once to get a frame
+[MarkerPosArray] = GetFrame(MarkerPosArray);
+objectcreate = size(MarkerPosArray);
+
+while(objectcreate ~= 0)
+    
+    objnamevar = num2str(objectcreate);
+    
+    RedMarker{objnamevar} = Marker; %%creates marker of the position 
+    RedMarker{objnamevar}.Coords = MarkerPosArray(objectcreate); %%Sets the binds the coord to the array to the create created class element
+    disp(RedMarker{objnamevar}.Coords);
+    objectcreate = objectcreate - 1; %%decreases the object total
+end
 
 %%create objects from get frame using the marker class :D
-
+MazeComplete = true; %%test
 %%is complete end loop
 end
 
