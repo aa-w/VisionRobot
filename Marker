@@ -3,7 +3,8 @@ classdef Marker
     %   Detailed explanation goes here
     
     properties
-        Coords = [0.0 0.0 0.0];
+        Height = 0;
+        Width = 0;
         
         DistanceOfNeighbours;
         
