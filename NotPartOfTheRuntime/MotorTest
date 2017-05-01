@@ -1,0 +1,7 @@
+robot = NXTMotor();
+robot.Port = 'B';
+robot.Power = +50;
+robot.TachoLimit = +90;
+
+robot.SendToNXT();
+val = robot.ReadFromNXT();
