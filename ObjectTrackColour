@@ -2,28 +2,49 @@
 RedBoxcount = int32(0);
 IsFinished = false;
 MarkerPosArray = {};
+BlueMarker = {};
 
+NameArray = ['1', '2', '3', '4', '5', '6', '7', '8', '9', '10', '11', '12', '13'];
 %%set(cam,'TimerFcn',@SetVideoObject);
 MazeComplete = false;
 
-while(MazeComplete == false)
+%%while(MazeComplete == false) FOR THE LOOP SYSTEM
     
-%%run the function once to get a frame
+%run the function once to get a frame from red and blue elements to be stored in vectors
 [MarkerPosArray] = GetFrame(MarkerPosArray);
-objectcreate = size(MarkerPosArray);
+[BlueMarker] = GetBlueFrame(BlueMarker);
+ 
+objectcreate = length(MarkerPosArray);
 
+disp(objectcreate);
+%Dynamic remarker object creation
 while(objectcreate ~= 0)
     
-    objnamevar = num2str(objectcreate);
-    
-    RedMarker{objnamevar} = Marker; %%creates marker of the position 
-    RedMarker{objnamevar}.Coords = MarkerPosArray(objectcreate); %%Sets the binds the coord to the array to the create created class element
-    disp(RedMarker{objnamevar}.Coords);
+    %%objnamevar = num2str(objectcreate);
+    RedMarker{NameArray(objectcreate)} = Marker; %%creates marker of the position 
+    copyover = MarkerPosArray(objectcreate, 1);
+    RedMarker{NameArray(objectcreate)}.Height = copyover; %%Sets the binds the coord to the array to the create created class element
+    copyover = MarkerPosArray(objectcreate, 2);
+    RedMarker{NameArray(objectcreate)}.Width = copyover;
+    disp(RedMarker{NameArray(objectcreate)}.Height);
+    disp(RedMarker{NameArray(objectcreate)}.Width);
     objectcreate = objectcreate - 1; %%decreases the object total
 end
+
+BlueMarker1 = PrimaryMarker; %%Only two blue markers will ever be needed
+BlueMarker2 = PrimaryMarker;
+
+copyover = BlueMarkers(objectcreate, 1);
+BlueMarker1.Height = copyover;
+copyover = BlueMarkers(objectcreate, 2);
+BlueMarker1.Width = copyover;
+
+copyover = BlueMarkers(objectcreate, 1);
+BlueMarker2.Height = copyover;
+copyover = BlueMarkers(objectcreate, 2);
+BlueMarker2.Width = copyover;
 
 %%create objects from get frame using the marker class :D
 MazeComplete = true; %%test
 %%is complete end loop
-end
-
+%% end
