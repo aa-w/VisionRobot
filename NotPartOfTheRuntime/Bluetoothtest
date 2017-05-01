@@ -1,0 +1,8 @@
+h = COM_OpenNXT('bluetooth.ini');
+COM_SetDefaultNXT(h);
+mA = NXTMotor('A');
+
+mA.Power = 50;
+mA.SendToNXT();
+
+mA.Stop('off');
