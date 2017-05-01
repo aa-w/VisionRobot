@@ -1,0 +1,26 @@
+function [ sDistances, sAngles ] = UltraScan( angle, speed)
+%ULTRASCAN Summary of this function goes here
+%   Detailed explanation goes here
+OpenUltrasonic(SENSOR_4);
+
+motorB = NXTMotor();
+motorB.Port = 'B';
+motorB.Power = speed;
+motorB.TachoLimit = angle;
+motorB.SendToNXT();
+
+data = motorB.ReadFromNXT();
+
+sDistances = []; %set vectors
+sAngles = [];
+
+while data.IsRunning
+    sDistances(end+1) = GetUltrasonic(SENSOR_4);
+    sAngles(end +1) = data.TachoCount;
+    data = motorB.ReadFromNXT();
+end
+
+motorB.Power = -50; %%reverses the set motor speed
+motorB.SendToNXT();
+
+
