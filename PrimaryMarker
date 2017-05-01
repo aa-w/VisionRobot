@@ -1,0 +1,14 @@
+classdef PrimaryMarker < Marker
+    %BLUEMARKER Summary of this class goes here
+    %   Detailed explanation goes here
+    
+    properties
+        
+        isRobot = false;
+        
+    end
+    
+    methods
+    end
+    
+end
