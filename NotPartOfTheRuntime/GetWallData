@@ -1,0 +1,11 @@
+function [ output_args ] = GetWallData( input_args )
+%GETWALLDATA Summary of this function goes here
+%   Detailed explanation goes here
+myMotor = NXTMotor();
+myMotor.Port = 'B';
+myMotor.Power = +30;
+myMotor.TachoLimit = +360;
+
+myMotor.SendToNXT();
+
+end
