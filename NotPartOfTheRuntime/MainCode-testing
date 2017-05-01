@@ -1,0 +1,17 @@
+%% Scan TEST
+
+[sDistances,sAngles ] = UltraScan( 360, 4);
+polar(sAngles/180*pi, sDistances);
+
+startExitIdx = find(sDistances == 150, 1, 'first');
+stopExitIdx = find(sDistances == 150, 1, 'last');
+
+startAngles = sAngles(startExitIdx);
+stopAngles = sAngles(stopExitIdx);
+
+exitAngle = mean([startAngles, stopAngles]); %average of both angles
+
+hold on;
+%%polar(startAngles/180*pi, startAngles/180*pi, 'ro');
+%%polar(stopAngles/180*pi, stopAngles/180*pi, 'ro');
+%%polar(exitAngle/180*pi, exitAngle/180*pi, 'go');
