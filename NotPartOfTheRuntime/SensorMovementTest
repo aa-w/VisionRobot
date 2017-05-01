@@ -1,0 +1,8 @@
+
+myMotor = COM_GetDefaultNXT();
+myMotor.Port = 'B';
+myMotor.Power = +30;
+myMotor.TachoLimit = +360;
+
+myMotor.SendToNXT();
+val = myMotor.ReadFromNXT();
