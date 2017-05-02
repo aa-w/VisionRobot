@@ -2,9 +2,10 @@
 RedBoxcount = int32(0);
 IsFinished = false;
 MarkerPosArray = {};
-BlueMarker = {};
+BlueMarkerArray = {};
+holdname = 0;
 
-NameArray = ['1', '2', '3', '4', '5', '6', '7', '8', '9', '10', '11', '12', '13'];
+NameArray = [ 'a', 'b', 'c', 'd', 'e', 'f', 'g', 'h', 'i', 'j', 'k','1', '2', '3', '4', '5', '6', '7', '8', '9', '10', '11'];
 %%set(cam,'TimerFcn',@SetVideoObject);
 MazeComplete = false;
 
@@ -12,39 +13,83 @@ MazeComplete = false;
     
 %run the function once to get a frame from red and blue elements to be stored in vectors
 [MarkerPosArray] = GetFrame(MarkerPosArray);
-[BlueMarker] = GetBlueFrame(BlueMarker);
- 
-objectcreate = length(MarkerPosArray);
+[BlueMarkerArray] = GetBlueFrame(BlueMarkerArray);
 
+objectcreate = size(MarkerPosArray, 1);
+valuecheck = objectcreate;
+redobject = (objectcreate / 2); %%this value is a constant - Matlab cannot define constant values
 disp(objectcreate);
+objectscreated = 0;
+
 %Dynamic remarker object creation
 while(objectcreate ~= 0)
     
     %%objnamevar = num2str(objectcreate);
     RedMarker{NameArray(objectcreate)} = Marker; %%creates marker of the position 
-    copyover = MarkerPosArray(objectcreate, 1);
+    copyover = MarkerPosArray(objectcreate, 1); %selects first element from that cell
     RedMarker{NameArray(objectcreate)}.Height = copyover; %%Sets the binds the coord to the array to the create created class element
-    copyover = MarkerPosArray(objectcreate, 2);
-    RedMarker{NameArray(objectcreate)}.Width = copyover;
-    disp(RedMarker{NameArray(objectcreate)}.Height);
-    disp(RedMarker{NameArray(objectcreate)}.Width);
+    holdname = objectcreate;
+    
+    objectcreate = objectcreate - 1;
+    copyover = MarkerPosArray(objectcreate, 1);
+    RedMarker{NameArray(holdname)}.Width = copyover;
+    
+    disp(RedMarker{NameArray(holdname)}.Height);
+    disp(RedMarker{NameArray(holdname)}.Width);
     objectcreate = objectcreate - 1; %%decreases the object total
+    objectscreated = objectscreated + 1;%holds track of the actual amount of  red marker objects created
 end
 
+objectcreate = size(BlueMarkerArray, 1);
 BlueMarker1 = PrimaryMarker; %%Only two blue markers will ever be needed
 BlueMarker2 = PrimaryMarker;
 
-copyover = BlueMarkers(objectcreate, 1);
+copyover = BlueMarkerArray(objectcreate, 1);
 BlueMarker1.Height = copyover;
-copyover = BlueMarkers(objectcreate, 2);
+objectcreate = objectcreate - 1;
+copyover = BlueMarkerArray(objectcreate, 1);
 BlueMarker1.Width = copyover;
 
-copyover = BlueMarkers(objectcreate, 1);
+objectcreate = objectcreate - 1;
+copyover = BlueMarkerArray(objectcreate, 1);
 BlueMarker2.Height = copyover;
-copyover = BlueMarkers(objectcreate, 2);
+objectcreate = objectcreate - 1;
+copyover = BlueMarkerArray(objectcreate, 1);
 BlueMarker2.Width = copyover;
 
+itts = 0;
+smallestHeight = valuecheck;
+smallestWidth = valuecheck;
+biggestHeight = valuecheck;
+biggestWidth = valuecheck;
+stopstate = valuecheck;
+while (valuecheck ~= redobject) %iterates through each value comparing them Fully test this section
+try
+    currentVal = str2double(RedMarker{NameArray(valuecheck)}.Height);
+catch
+    break; %alternate break statement
+end
+
+smallestValH = str2double(RedMarker{NameArray(smallestHeight)}.Height);
+smallestValW = str2double(RedMarker{NameArray(smallestWidth)}.Width); %converts the values from cells to vairable for working
+biggestValH = str2double %%%%%%%%%%%%%%%%%%%%%%%CHECK THIS SECTION IT MAY BE OFF
+biggestValW = str2double
+
+if (smallestVal > currentVal) %checks the height against the current value
+    smallestHeight = valuecheck;
+end
+
+if (smallestValW > currentVal) %checks the width against the current value
+    smallestWidth = valuecheck;
+end
+
+    valuecheck = valuecheck - 1;
+    itts = itts + 1;
+end
+disp(NameArray(smallestWidth));
+disp(NameArray(smallestHeight));
 %%create objects from get frame using the marker class :D
+%%next step is to add size
 MazeComplete = true; %%test
 %%is complete end loop
 %% end
