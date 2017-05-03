@@ -5,10 +5,11 @@ classdef PrimaryMarker < Marker
     properties
         
         isRobot = false;
-        
+        isEnd = false;
     end
     
     methods
     end
     
 end
+
