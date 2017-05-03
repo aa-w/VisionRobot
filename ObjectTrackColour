@@ -16,7 +16,7 @@ MazeComplete = false;
 [BlueMarkerArray] = GetBlueFrame(BlueMarkerArray);
 
 objectcreate = size(MarkerPosArray, 1);
-valuecheck = objectcreate;
+PermaObjectCreate = objectcreate; %Keeps a nonchanging value for the number of Markers
 redobject = (objectcreate / 2); %%this value is a constant - Matlab cannot define constant values
 disp(objectcreate);
 objectscreated = 0;
@@ -57,30 +57,51 @@ objectcreate = objectcreate - 1;
 copyover = BlueMarkerArray(objectcreate, 1);
 BlueMarker2.Width = copyover;
 
+BlueMarker1Con = cell2mat(BlueMarker1.Width);
+BlueMarker2Con = cell2mat(BlueMarker2.Width);
+
+if (BlueMarker1Con < BlueMarker2Con)
+    BlueMarker1.isRobot = true;
+    BlueMarker2.isEnd = true;
+else
+    BlueMarker1.isEnd = true;
+    BlueMarker2.isRobot = true;
+end
+
 itts = 0;
+valuecheck = objectscreated;
 smallestHeight = valuecheck;
 smallestWidth = valuecheck;
 biggestHeight = valuecheck;
 biggestWidth = valuecheck;
-stopstate = valuecheck;
-while (valuecheck ~= redobject) %iterates through each value comparing them Fully test this section
+stopstate = PermaObjectCreate - valuecheck;
+disp(valuecheck);
+for valuecheck = valuecheck:-1:0 %FOR loop iterates through each value comparing them Fully test this section
 try
-    currentVal = str2double(RedMarker{NameArray(valuecheck)}.Height);
+    currentValH = cell2mat(RedMarker{NameArray(valuecheck)}.Height);
+    currentValW = cell2mat(RedMarker{NameArray(valuecheck)}.Width);
+    smallestValH = cell2mat(RedMarker{NameArray(smallestHeight)}.Height);
+    smallestValW = cell2mat(RedMarker{NameArray(smallestWidth)}.Width); %converts the values from cells to vairable for working
+    biggestValH = cell2mat(RedMarker{NameArray(biggestHeight)}.Height);
+    biggestValW = cell2mat(RedMarker{NameArray(biggestWidth)}.Width);
 catch
     break; %alternate break statement
 end
 
-smallestValH = str2double(RedMarker{NameArray(smallestHeight)}.Height);
-smallestValW = str2double(RedMarker{NameArray(smallestWidth)}.Width); %converts the values from cells to vairable for working
-biggestValH = str2double %%%%%%%%%%%%%%%%%%%%%%%CHECK THIS SECTION IT MAY BE OFF
-biggestValW = str2double
-
-if (smallestVal > currentVal) %checks the height against the current value
+if (smallestValH > currentValH) %checks the height against the current value
     smallestHeight = valuecheck;
 end
 
-if (smallestValW > currentVal) %checks the width against the current value
+if (smallestValW > currentValW) %checks the width against the current value
     smallestWidth = valuecheck;
+end
+
+if (biggestValH < currentValH) %checks the width against the current value
+    biggestHeight = valuecheck;
+end
+
+if (biggestValW < currentValW) %checks the width against the current value
+    biggestWidth = valuecheck;
 end
 
     valuecheck = valuecheck - 1;
@@ -88,8 +109,15 @@ end
 end
 disp(NameArray(smallestWidth));
 disp(NameArray(smallestHeight));
-%%create objects from get frame using the marker class :D
-%%next step is to add size
+disp(NameArray(biggestWidth));
+disp(NameArray(biggestHeight));
+%%Sets bools based on statements set
+RedMarker{NameArray(smallestWidth)}.isBottomRight = true;
+RedMarker{NameArray(smallestHeight)}.isTipRight = true;
+RedMarker{NameArray(biggestHeight)}.isTopLeft = true;
+RedMarker{NameArray(biggestWidth)}.isBottomRight = true;
+
+%finding items within a range
+
 MazeComplete = true; %%test
 %%is complete end loop
-%% end
