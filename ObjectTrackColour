@@ -1,3 +1,5 @@
+%separately for easier debugging
+%Maze analysis Stage
 %%start set up code
 RedBoxcount = int32(0);
 IsFinished = false;
@@ -40,36 +42,25 @@ while(objectcreate ~= 0) %consider changing to a loop
     objectscreated = objectscreated + 1;%holds track of the actual amount of  red marker objects created
 end
 
-objectcreate = size(BlueMarkerArray, 1);
+objectcreate = 1;
 BlueMarker1 = PrimaryMarker; %%Only two blue markers will ever be needed
 BlueMarker2 = PrimaryMarker;
 
 copyover = BlueMarkerArray(objectcreate, 1);
 BlueMarker1.Height = copyover;
-objectcreate = objectcreate - 1;
+objectcreate = objectcreate + 1;
 copyover = BlueMarkerArray(objectcreate, 1);
 BlueMarker1.Width = copyover;
 
-objectcreate = objectcreate - 1;
+objectcreate = objectcreate + 1;
 copyover = BlueMarkerArray(objectcreate, 1);
 BlueMarker2.Height = copyover;
-objectcreate = objectcreate - 1;
+objectcreate = objectcreate + 1;
 copyover = BlueMarkerArray(objectcreate, 1);
 BlueMarker2.Width = copyover;
 
-BlueMarker1Con = cell2mat(BlueMarker1.Width);
-BlueMarker2Con = cell2mat(BlueMarker2.Width);
-
-if (BlueMarker1Con < BlueMarker2Con)
-    BlueMarker1.isRobot = true;
-    BlueMarker2.isEnd = true;
-else
-    BlueMarker1.isEnd = true;
-    BlueMarker2.isRobot = true;
-end
-
 itts = 0;
-valuecheck = objectscreated;
+valuecheck = PermaObjectCreate;
 smallestHeight = valuecheck;
 smallestWidth = valuecheck;
 biggestHeight = valuecheck;
@@ -77,16 +68,16 @@ biggestWidth = valuecheck;
 stopstate = PermaObjectCreate - valuecheck;
 disp(valuecheck);
 for valuecheck = valuecheck:-1:0 %FOR loop iterates through each value comparing them Fully test this section
-
+try
     currentValH = cell2mat(RedMarker{NameArray(valuecheck)}.Height);
     currentValW = cell2mat(RedMarker{NameArray(valuecheck)}.Width);
     smallestValH = cell2mat(RedMarker{NameArray(smallestHeight)}.Height);
     smallestValW = cell2mat(RedMarker{NameArray(smallestWidth)}.Width); %converts the values from cells to vairable for working
     biggestValH = cell2mat(RedMarker{NameArray(biggestHeight)}.Height);
     biggestValW = cell2mat(RedMarker{NameArray(biggestWidth)}.Width);
-
-
-
+catch
+    break;
+end
 if (smallestValH > currentValH) %checks the height against the current value
     smallestHeight = valuecheck;
 end
@@ -102,7 +93,6 @@ end
 if (biggestValW < currentValW) %checks the width against the current value
     biggestWidth = valuecheck;
 end
-
     itts = itts + 1;
 end
 disp(NameArray(smallestWidth));
@@ -116,6 +106,97 @@ RedMarker{NameArray(biggestHeight)}.isTopLeft = true;
 RedMarker{NameArray(biggestWidth)}.isBottomRight = true;
 
 %finding items within a range
-
 MazeComplete = true; %%test
 %%is complete end loop
+%Robot Movement Stage
+%%opening comunication with the NXT over USB
+%h = COM_OpenNXT('bluetooth.ini'); %%alter this
+%COM_SetDefaultNXT(h);
+%Intialise Wall Objects
+Center = WallValues;
+Left = WallValues;
+Right = WallValues;
+
+%%tests the Marker positons to see which on is the Robot
+motorB = NXTMotor();
+motorB.Port = 'B';
+motorB.Power = 40;
+motorB.TachoLimit = 90;
+motorB.SendToNXT();
+%%Pulls a frame of the new measurements
+[BlueMarkerArray] = GetBlueFrame(BlueMarkerArray);
+motorB.Power = -40; %%reverses the motor back to the start poisiton
+motorB.SendToNXT();
+
+%sets values for comparison between the moved robot and the previous frame reference
+objectTest  = 1;
+Comp1Height = cell2mat(BlueMarkerArray(objectTest, 1));
+objectTest = objectTest + 1;
+Comp2Height = cell2mat(BlueMarkerArray(objectTest, 1));
+
+BlueMarker1CompHeight = cell2mat(BlueMarker1.Height);
+BlueMarker2CompHeight = cell2mat(BlueMarker2.Height);
+
+if (Comp2Height > (BlueMarker2CompHeight - 2) && Comp2Height < (BlueMarker2CompHeight + 2))
+    %Marker 1 was in the same positon therefore not the robot
+    BlueMarker1.isRobot = true;
+    BlueMarker2.isEnd = true;
+elseif (Comp1Height > (BlueMarker1CompHeight - 2) && Comp1Height < (BlueMarker1CompHeight + 2))
+    %Marker 2 was in the same positon therefore not the robot
+    BlueMarker2.isRobot = true;
+    BlueMarker1.isEnd = true;
+else
+    %debug option
+    disp('No movement was found - Line 150');
+    disp(Comp2Height);
+    disp(BlueMarker2CompHeight);
+end
+
+ %base value for UltraDistance
+Robot = RobotFunc;
+OpenUltrasonic(SENSOR_4);
+robot = NXTMotor();
+robot.Port = 'AC';
+robot.Power = +30;
+robot.SpeedRegulation = 0; %Speed regulation must be turned off in order for both Motors to work at the same time
+robot.SendToNXT();
+
+RobotOut = motorB.ReadFromNXT();
+distance = GetUltrasonic(SENSOR_4);
+
+%moves towards the first wal in the maze to geta placement
+while(distance < 10)
+distance = GetUltrasonic(SENSOR_4);
+robot.Power = +30;
+robot.SendToNXT();
+end
+robot.Power = 0;
+
+if (BlueMarker1.isRobot == true)
+while((cell2mat(BlueMarker1.Height) + cell2mat(BlueMarker1.Height)) ~= (cell2mat(BlueMarker2.Height) + cell2mat(BlueMarker2.Width)))
+[Center, Left, Right] = GetWallValues(Center, Left, Right);
+Robot.WallHistory = [WallHistory; Center.Distance; Left.Distance; Right.Distance];
+if (Center.isWall == true)
+    if(Left.isWall == false)
+        RobotMoveLeft(Speed, TachoLimit);
+    elseif(Right.isWall == false)
+        RobotMoveLeft(Speed, TachoLimit);
+    else %%360 turn
+        RobotMoveRight(Speed, TachoLimit);
+    end
+else
+    RobotMoveForward(Speed, TachoLimit);
+end
+
+end
+elseif (BlueMarker2.isRobot == true)
+%this will copy over the code section above
+%I choose to produce the same function twice rather than running a function
+%as it saves the amount of vairables that need to be passed over
+
+else
+    disp('Neither BlueMarker has been set to true');
+    disp('Error on line 175 BlueMarker if Statement');
+    
+end
+
