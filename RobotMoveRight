@@ -1,0 +1,10 @@
+function [ ] = RobotMoveRight( Speed, TachoLimit )
+%Moves the Robot's only the Right Motor Forwards
+
+robot = NXTMotor();
+robot.Port = 'C';
+robot.Power = +Speed;
+robot.TachoLimit = +TachoLimit;
+robot.SendToNXT();
+
+end
