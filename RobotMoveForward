@@ -1,0 +1,11 @@
+function [ ] = RobotMoveForward( Speed, TachoLimit )
+%Duel Motor Movement of the Robot based on distance to move and Speed given
+%   Detailed explanation goes here
+robot = NXTMotor();
+robot.Port = 'AC';
+robot.Power = +{Speed};
+robot.SpeedRegulation = 0; %% Speed regulation must be turned off in order for both Motors to work at the same time
+robot.TachoLimit = +{TachoLimit};
+robot.SendToNXT();
+
+end
