@@ -1,0 +1,13 @@
+classdef WallValues
+    %WALLVALUES Summary of this class goes here
+    %   Detailed explanation goes here
+    
+    properties
+    Distance = 0;
+    isWall;
+    end
+    
+    methods
+    end
+    
+end
