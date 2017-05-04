@@ -22,7 +22,7 @@ disp(objectcreate);
 objectscreated = 0;
 
 %Dynamic remarker object creation
-while(objectcreate ~= 0)
+while(objectcreate ~= 0) %consider changing to a loop
     
     %%objnamevar = num2str(objectcreate);
     RedMarker{NameArray(objectcreate)} = Marker; %%creates marker of the position 
@@ -77,16 +77,15 @@ biggestWidth = valuecheck;
 stopstate = PermaObjectCreate - valuecheck;
 disp(valuecheck);
 for valuecheck = valuecheck:-1:0 %FOR loop iterates through each value comparing them Fully test this section
-try
+
     currentValH = cell2mat(RedMarker{NameArray(valuecheck)}.Height);
     currentValW = cell2mat(RedMarker{NameArray(valuecheck)}.Width);
     smallestValH = cell2mat(RedMarker{NameArray(smallestHeight)}.Height);
     smallestValW = cell2mat(RedMarker{NameArray(smallestWidth)}.Width); %converts the values from cells to vairable for working
     biggestValH = cell2mat(RedMarker{NameArray(biggestHeight)}.Height);
     biggestValW = cell2mat(RedMarker{NameArray(biggestWidth)}.Width);
-catch
-    break; %alternate break statement
-end
+
+
 
 if (smallestValH > currentValH) %checks the height against the current value
     smallestHeight = valuecheck;
@@ -104,7 +103,6 @@ if (biggestValW < currentValW) %checks the width against the current value
     biggestWidth = valuecheck;
 end
 
-    valuecheck = valuecheck - 1;
     itts = itts + 1;
 end
 disp(NameArray(smallestWidth));
@@ -113,7 +111,7 @@ disp(NameArray(biggestWidth));
 disp(NameArray(biggestHeight));
 %%Sets bools based on statements set
 RedMarker{NameArray(smallestWidth)}.isBottomRight = true;
-RedMarker{NameArray(smallestHeight)}.isTipRight = true;
+RedMarker{NameArray(smallestHeight)}.isTopRight = true;
 RedMarker{NameArray(biggestHeight)}.isTopLeft = true;
 RedMarker{NameArray(biggestWidth)}.isBottomRight = true;
 
