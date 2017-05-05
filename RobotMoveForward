@@ -1,11 +1,32 @@
-function [ ] = RobotMoveForward( Speed, TachoLimit )
+function [] = RobotMoveForward(Speed)
 %Duel Motor Movement of the Robot based on distance to move and Speed given
 %   Detailed explanation goes here
-robot = NXTMotor();
-robot.Port = 'AC';
-robot.Power = +{Speed};
-robot.SpeedRegulation = 0; %% Speed regulation must be turned off in order for both Motors to work at the same time
-robot.TachoLimit = +{TachoLimit};
-robot.SendToNXT();
+MotorAC = NXTMotor();
+Distance = GetUltrasonic(SENSOR_4);
+OpenUltrasonic(SENSOR_4);
+OpenSwitch(SENSOR_3);
+switchVal = zeros(1,50);
+ButtonPressed = switchVal;
 
+MotorAC.Port = 'AC';
+MotorAC.SpeedRegulation = false; %% Speed regulation must be turned off in order for both Motors to work at the same time
+MotorAC.TachoLimit = 0; %Setting the Tacho Limit to 0 will mean that it wil run forever
+
+
+while(Distance > 10)
+Distance = GetUltrasonic(SENSOR_4);
+MotorAC.Power = Speed;
+MotorAC.SendToNXT();
+if (ButtonPressed == 1) %If the Robot Hits a wall while moving it will activate the push snesor and then reverse away from the wall
+    MotorAC.Power = -Speed;
+    MotorAC.TachoLimit = 360;
+    MotorAC.SendToNXT();
+    MotorAC.TachoLimit = 0;
+    break;
+end
+end
+MotorAC.Power = 0; %Resets the system after it has stopped moving
+MotorAC.SendToNXT();
+CloseSensor(SENSOR_3);
+CloseSensor(SENSOR_4);
 end
