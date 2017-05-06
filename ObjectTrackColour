@@ -1,15 +1,11 @@
-%Open COM with Robot using winlib drivers
-%%h = COM_OpenNXTEx('USB');
-
-COM_SetDefaultNXT(h); %Sets up communication for sensor and motor use
+h = COM_OpenNXT();
+COM_SetDefaultNXT(h); %Sets up communication for sensor and motor use over USB
 
 %Maze analysis Stage
 %%start set up code
-RedBoxcount = int32(0);
-IsFinished = false;
-MarkerPosArray = {};
-BlueMarkerArray = {};
-holdname = 0;
+RedBoxcount = int32(0); 
+MarkerPosArray = {}; %Delcares the Matrix for the Red Marker Array
+BlueMarkerArray = {}; %Declares the Matrix for the Blue Marker Array
 
 NameArray = [ 'a', 'b', 'c', 'd', 'e', 'f', 'g', 'h', 'i', 'j', 'k','1', '2', '3', '4', '5', '6', '7', '8', '9', '10', '11'];%Array  of the Set of marker names avaliable
 %NameArray currently supports 22 Markers but can easily be expanded for
@@ -17,14 +13,15 @@ NameArray = [ 'a', 'b', 'c', 'd', 'e', 'f', 'g', 'h', 'i', 'j', 'k','1', '2', '3
 NamesUsed = []; %Creates an array of the names used during the creation of the RedMarkers
 %Get frame functions run once to get a frame from red and blue elements to be
 %stored in Matrixes and to work out the number of markers and positons
-[MarkerPosArray] = GetFrame(MarkerPosArray);
-[BlueMarkerArray] = GetBlueFrame(BlueMarkerArray);
+[MarkerPosArray] = GetFrame(MarkerPosArray); %Runs function to get camera position
+[BlueMarkerArray] = GetBlueFrame(BlueMarkerArray); %Runs function to get Blue marker positions
 
-objectcreate = size(MarkerPosArray,1);
+objectcreate = size(MarkerPosArray,1); %gets the size of the red Marker array for indexing object creation
 PermaObjectCreate = objectcreate; %Keeps a nonchanging value for the number of Markers
 redobject = (objectcreate / 2); %%this value is a constant - Matlab cannot define constant values
-disp(objectcreate);
-objectscreated = 0;
+disp(objectcreate); %Debug displays the number of object that will be created
+objectscreated = 0; %Counts how many objects have been created
+holdname = 0; %Second indexing value for dynamic object declaration
 
 %Dynamic remarker object creation
 while(objectcreate ~= 0) %consider changing to a loop
@@ -32,85 +29,78 @@ while(objectcreate ~= 0) %consider changing to a loop
     %%objnamevar = num2str(objectcreate);
     RedMarker{NameArray(objectcreate)} = Marker; %%creates marker of the position 
     copyover = MarkerPosArray(objectcreate, 1); %selects first element from that cell
-    RedMarker{NameArray(objectcreate)}.Height = copyover; %%Sets the binds the coord to the array to the create created class element
-    NamesUsed = [NamesUsed; NameArray(objectcreate)];
-    holdname = objectcreate;
+    RedMarker{NameArray(objectcreate)}.Width = copyover; %%Sets the binds the coord to the array to the create created class element
+    NamesUsed = [NamesUsed; NameArray(objectcreate)]; %Stores the name value of each object created from the Name Array
+    holdname = objectcreate; %Copys over the holdname so that the width can be set for each marker
     
-    objectcreate = objectcreate - 1;
+    objectcreate = objectcreate - 1; %Decrements the indexing value as it works backwards through the array
     copyover = MarkerPosArray(objectcreate, 1);
-    RedMarker{NameArray(holdname)}.Width = copyover;
+    RedMarker{NameArray(holdname)}.Height = copyover; %Width is created before Height as the loop works backwards through the array
     
-    disp(RedMarker{NameArray(holdname)}.Height);
+    disp(RedMarker{NameArray(holdname)}.Height); %Displays the values of the markers for debugging
     disp(RedMarker{NameArray(holdname)}.Width);
     objectcreate = objectcreate - 1; %%decreases the object total
     objectscreated = objectscreated + 1;%holds track of the actual amount of  red marker objects created
 end
 
-objectcreate = 1;
+objectcreate = 1; %Object create key is reset back to start of array (Matlab array count from 1)
 if (size(BlueMarkerArray,1) == 4)
-BlueMarker1 = PrimaryMarker; %%Only two blue markers will ever be needed
-BlueMarker2 = PrimaryMarker;
+BlueMarker1 = PrimaryMarker; %Only two blue markers will ever be needed
+BlueMarker2 = PrimaryMarker;%One marker for the robot, the other for the exit
 
-copyover = BlueMarkerArray(objectcreate, 1);
-BlueMarker1.Height = copyover;
-objectcreate = objectcreate + 1;
-copyover = BlueMarkerArray(objectcreate, 1);
-BlueMarker1.Width = copyover;
+BlueMarker1.Height = BlueMarkerArray(objectcreate, 1);  %The height and width values are set for one marker
+objectcreate = objectcreate + 1; %In the Blue Marker Array values are stored on seperate lines, this means the key must be increased
+BlueMarker1.Width = BlueMarkerArray(objectcreate, 1); %Width for marker 1
 
-objectcreate = objectcreate + 1;
-copyover = BlueMarkerArray(objectcreate, 1);
-BlueMarker2.Height = copyover;
-objectcreate = objectcreate + 1;
-copyover = BlueMarkerArray(objectcreate, 1);
-BlueMarker2.Width = copyover;
+objectcreate = objectcreate + 1; %Array key increment
+BlueMarker2.Height = BlueMarkerArray(objectcreate, 1); %Same routine as first blue marker
+objectcreate = objectcreate + 1;  %Array key increment
+BlueMarker2.Width = BlueMarkerArray(objectcreate, 1);
 else
-    disp(size(BlueMarkerArray,1));
+    disp(size(BlueMarkerArray,1)); %Error handleing outputs the problem in the console
     disp('Incorrect number of Blue Markers found');
 end
-itts = 0;
+itts = 0; %Debug value counts the number of times the loop as run
 Arraysize = size(NamesUsed,1); %NamesUsed holds the actual names used at creation, this is used to sort through each value
-valuecheck = NamesUsed(Arraysize);
+valuecheck = NamesUsed(Arraysize);%Holds the last item in the array as starting point
 %Initial Values for each check is set before the actual value is found
-smallestHeight = NamesUsed(Arraysize);
+smallestHeight = NamesUsed(Arraysize); %the start value for each attribute is set
 smallestWidth = NamesUsed(Arraysize);
 biggestHeight = NamesUsed(Arraysize);
 biggestWidth = NamesUsed(Arraysize);
 disp(valuecheck);
 for Arraysize = Arraysize:-1:0 %FOR loop iterates through each value comparing them Fully test this section
-try
-    currentValH = cell2mat(RedMarker{NamesUsed(valuecheck)}.Height);
-    currentValW = cell2mat(RedMarker{NamesUsed(valuecheck)}.Width);
-    smallestValH = cell2mat(RedMarker{smallestHeight}.Height);
-    smallestValW = cell2mat(RedMarker{smallestWidth}.Width); %converts the values from cells to vairable for working
-    biggestValH = cell2mat(RedMarker{biggestHeight}.Height);
-    biggestValW = cell2mat(RedMarker{biggestWidth}.Width);
+try %attempts to convert values, will break exceding the array
+    currentValH = cell2mat(RedMarker{NamesUsed(valuecheck)}.Height); %converts the values from cells to vairable for working
+    currentValW = cell2mat(RedMarker{NamesUsed(valuecheck)}.Width);%
+    smallestValH = cell2mat(RedMarker{smallestHeight}.Height);%
+    smallestValW = cell2mat(RedMarker{smallestWidth}.Width); %
+    biggestValH = cell2mat(RedMarker{biggestHeight}.Height);%
+    biggestValW = cell2mat(RedMarker{biggestWidth}.Width);%
 catch
-    break;
+    break; %Breaks if the value is not convertible / exists
 end
 if (smallestValH > currentValH) %checks the height against the current value
-    smallestHeight = valuecheck;
+    smallestHeight = valuecheck; %Replaces the value if it fits
 end
 
 if (smallestValW > currentValW) %checks the width against the current value
     smallestWidth = valuecheck;
 end
 
-if (biggestValH < currentValH) %checks the width against the current value
+if (biggestValH < currentValH) %checks the height against the current value
     biggestHeight = valuecheck;
 end
 
 if (biggestValW < currentValW) %checks the width against the current value
     biggestWidth = valuecheck;
 end
-    itts = itts + 1;
+    itts = itts + 1; %Debug counter increments (Shorthand incrementation is not avaliable in Matlab)
 end
-disp(smallestWidth); %%DEBUG
-disp(smallestHeight);
-disp(biggestWidth);
-disp(biggestHeight);
+
 %%Sets bools based on statements set
-RedMarker{smallestWidth}.isBottomRight = true;
-RedMarker{smallestHeight}.isTopRight = true;
+RedMarker{smallestWidth}.isBottomRight = true; %Sets the logical attributes for each of the qualities
+RedMarker{smallestHeight}.isTopRight = true; %Logcial Attributes are stored in the class object for later use
 RedMarker{biggestHeight}.isTopLeft = true;
 RedMarker{biggestWidth}.isBottomRight = true;
 
@@ -119,131 +109,195 @@ MazeComplete = true; %%test
 %%is complete end loop
 %Robot Movement Stage
 %%opening comunication with the NXT over USB
-%h = COM_OpenNXT('bluetooth.ini'); %%alter this
-%COM_SetDefaultNXT(h);
+
 %Intialise Wall Objects
-Center = WallValues;
+Center = WallValues; %Classes are created for each of the walls to hold values
 Left = WallValues;
 Right = WallValues;
 
-%%tests the Marker positons to see which one is the Robot
-motorB = NXTMotor();
-motorB.Port = 'B';
-motorB.Power = 40;
-motorB.TachoLimit = 90;
-motorB.SendToNXT();
+%This Section of code test which blue marker is the robot and which is th
+%end point through movement tests
 
-%%Pulls a frame of the new measurements
-[BlueMarkerArray] = GetBlueFrame(BlueMarkerArray);
+%Te motor head is moved, this is used to tell which marker is the end and
+%which is the Robot
+motorB = NXTMotor(); %Motor object is created
+motorB.Port = 'B'; %Port declared
+motorB.Power = 40; %Power level set
+motorB.TachoLimit = 90; %The angle at which the activates the Tacho limit is set
+motorB.ActionAtTachoLimit = 'Brake'; %The action on Tacho Limit is set
+motorB.SendToNXT(); %Instruction set is sent to the Robot
+
+%%Pulls a frame of the new measurements of moved robot
+[BlueMarkerArray] = GetBlueFrame(BlueMarkerArray); 
 motorB.Power = -40; %%reverses the motor back to the start poisiton
 motorB.TachoLimit = 90;
-motorB.SendToNXT();
+motorB.SendToNXT(); %Reverse instructions are sent to the Robot
 
 %sets values for comparison between the moved robot and the previous frame reference
-objectTest  = 1;
-Comp1Height = cell2mat(BlueMarkerArray(objectTest, 1));
-objectTest = objectTest + 1;
-Comp2Height = cell2mat(BlueMarkerArray(objectTest, 1));
+objectTest  = 1; %Key used to read array values is established
+Comp1Height = cell2mat(BlueMarkerArray(objectTest, 1)); %Height Value is taken from the array and converted from the cell
+objectTest = objectTest + 1; %Key incremented
+Comp2Height = cell2mat(BlueMarkerArray(objectTest, 1)); %Width Value is taken from the array and converted from the cell
 
-BlueMarker1CompHeight = cell2mat(BlueMarker1.Height);
+BlueMarker1CompHeight = cell2mat(BlueMarker1.Height); %original Height positions are taken from the object classes
 BlueMarker2CompHeight = cell2mat(BlueMarker2.Height);
 
+%Of statement tests to see whcih marker is the same position countering a potential error of 2
 if (Comp2Height > (BlueMarker2CompHeight - 2) && Comp2Height < (BlueMarker2CompHeight + 2))
     %Marker 1 was in the same positon therefore not the robot
-    BlueMarker1.isRobot = true;
+    BlueMarker1.isRobot = true; %Sets the Values according to the result of statment
     BlueMarker2.isEnd = true;
 elseif (Comp1Height > (BlueMarker1CompHeight - 2) && Comp1Height < (BlueMarker1CompHeight + 2))
     %Marker 2 was in the same positon therefore not the robot
-    BlueMarker2.isRobot = true;
+    BlueMarker2.isRobot = true; %Sets the Values according to the result of statment
     BlueMarker1.isEnd = true;
 else
     %debug option
-    disp('No movement was found - Line 150');
-    disp(Comp2Height);
-    disp(BlueMarker2CompHeight);
+    disp('No movement was found - Line 161');
+    disp(Comp2Height); %Outputs that if statement was unsuccessful in the console for debugging
+    disp(BlueMarker2CompHeight); 
 end
 
 %base value for UltraDistance
 Robot = RobotFunc; %Creates an object from the class in order to store the wall values in
 Speed = 50; %Current Set Speed for all Functions, can be changed using this value
+%Speed is currently set at 50 ofr debugging but can be upped by the user
 TachoLimit = 270; %TachoLimit sets the angle of movement for the functions that do not have automation
 
 %moves towards the first wall in the maze to get a placement
 RobotMoveForward(Speed); %Moves the Robot into the maze
-BlueMarker1CellH = cell2mat(BlueMarker1.Height);
-BlueMarker1CellW = cell2mat(BlueMarker1.Width);
-BlueMarker2CellH = cell2mat(BlueMarker2.Height);
-BlueMarker2CellW = cell2mat(BlueMarker2.Width);
+BlueMarker1CellH = cell2mat(BlueMarker1.Height); %Gets workable cell values for the marker positions
+BlueMarker1CellW = cell2mat(BlueMarker1.Width); %
+BlueMarker2CellH = cell2mat(BlueMarker2.Height);%Gets workable cell values for the marker positions
+BlueMarker2CellW = cell2mat(BlueMarker2.Width); %
 
-if (BlueMarker1.isRobot == true)
+%The main if statement is split based on which marker is the robot, this
+if (BlueMarker1.isRobot == true)  %Checks the bool if Marker 1 is the robot
 while((BlueMarker1CellH + BlueMarker1CellW) ~= (BlueMarker2CellH + BlueMarker2CellW)) %%this needs to be adjusted
 
 BlueMarkerArray = []; %Clears BlueMarkerArray Before a new call
-[BlueMarkerArray] = GetBlueFrame(BlueMarkerArray);
+[BlueMarkerArray] = GetBlueFrame(BlueMarkerArray); %Get frame function is called
 
 %Blue Marker set based on position of robot marker - Updates the values
-BlueMarkerArrayPlacement = 3;
-copyover = BlueMarkerArray(BlueMarkerArrayPlacement, 1);
-BlueMarker1.Height = copyover;
+BlueMarkerArrayPlacement = 1; %Blue Marker Key
+BlueMarker1.Height = BlueMarkerArray(BlueMarkerArrayPlacement, 1); %Updates the values of the Robot marker
 BlueMarkerArrayPlacement = BlueMarkerArrayPlacement + 1;
 copyover = BlueMarkerArray(BlueMarkerArrayPlacement, 1);
 BlueMarker1.Width = copyover;
-BlueMarker1CellH = cell2mat(BlueMarker1.Height);
+BlueMarker1CellH = cell2mat(BlueMarker1.Height); %Values are set for manipulation
 BlueMarker1CellW = cell2mat(BlueMarker1.Weight);
 
 %Finding the closest value to the Robot and if that value is covered Mark
 %has been visited sets the next marker to aim for
-aimedHeight = 0;
+aimedHeight = 0; %Declares the aimed values for the next marker to travel to
 aimedWidth = 0;
-while(aimedHeight == 0 && aimedWidth == 0)
-Arraysize = size(NamesArray,1);
-for Arraysize = Arraysize:-1:0
-if (RedMarker{NamesArray(Arraysize)}.HasBeenVisited == false)
-checkHeight = RedMarker{NamesArray(Arraysize)}.Height;
-checkWidth = RedMarker{NamesArray(Arraysize)}.Width;
-if (BlueMarker1CellH > checkHeight)
-    answerH = BlueMarker1CellH - checkHeight;
+while(aimedHeight == 0 && aimedWidth == 0) %Finds the next marker to travel to
+Arraysize = size(NamesUsed,1); %Gets the number of red markers created
+for Arraysize = Arraysize:-1:1 %Loops for the whole set of red markers
+if (RedMarker{NamesUsed(Arraysize)}.HasBeenVisited == false) %Checks if the marker has been already visited
+checkHeight = RedMarker{NamesUsed(Arraysize)}.Height; %Sets comparison values
+checkHeight = cell2mat(checkHeight);%
+checkWidth = RedMarker{NamesUsed(Arraysize)}.Width; %Sets comparison values
+checkWidth = cell2mat(checkWidth);  %
+if (BlueMarker1CellH > checkHeight) %checks the height difference
+    answerH = BlueMarker1CellH - checkHeight; % Minuses one from the other to find differnce value
 else
-    answerH = checkHeight - BlueMarker1CellH;
+    answerH = checkHeight - BlueMarker1CellH; % Minuses one from the other to find differnce value
 end
-if (BlueMarker1CellW > checkWidth)
-    answerW = BlueMarker1CellW - checkHeight;
-else
-    answerW = checkHeight - BlueMarker1CellW;
+if (BlueMarker1CellW > checkWidth) %checks the height difference
+    answerW = BlueMarker1CellW - checkHeight; % Minuses one from the other to find differnce value
+else %checks the height difference
+    answerW = checkHeight - BlueMarker1CellW; % Minuses one from the other to find differnce value
 end
+AAnswer = []; %Creates blank array to be populated
 AAnswer = [AAnswer; answerH answerW]; %Array stores the value of each section before it is compared
 end
 %Skips values that have already been visited
 end
-Closest = min(AAnswer(:));
-[row, column] = find(AAnswer == Closest);
-[MarkerPosArray] = GetFrame(MarkerPosArray);
-Arraysize = size(NamesArray,1);
+Closest = min(AAnswer(:)); %finds the smallest difference in the array of value size
+[row, column] = find(AAnswer == Closest); %Finds te row and column value of the smallest difference in the array
+[MarkerPosArray] = GetFrame(MarkerPosArray); %Gets a new set of Robot marker coords
+Arraysize = size(NamesUsed,1);
 CompArraysize = size(MarkerPosArray);
 CompArraysize = CompArraysize / 2; %%Size is halfed to find only the number of values
 if (Arraysize > CompArraysize)
-    RedMarker{NamesArray(row)}.HasBeenVisited = true; %Removes the closest item if it is covered by the robot and therefore visited
+    RedMarker{NamesUsed(row)}.HasBeenVisited = true; %Removes the closest item if it is covered by the robot and therefore visited
 else
-    aimedHeight = RedMarker{NamesArray(row)}.Height; %Sets the coordsd of the markers to aim for in the movement stage
-    aimedWidth = RedMarker{NamesArray(row)}.Width;
+    aimedHeight = RedMarker{NamesArray(row)}.Height; %Sets the coords of the markers to aim for in the movement stage
+    aimedWidth = RedMarker{NamesArray(row)}.Width; %Converts the Redmarker values into the aimed values
+    aimedHeight = cell2mat(aimedHeight); %Converts value cells to doubles
+    aimedWidth = cell2mat(aimedWidth);
 end
 end
 
 %Movement stage
+
+Orientation = ''; %Used to test the movement orientation and return a facing value
+[Orientation] = RobotTestOrientation(BlueMarker1.isRobot, BlueMarker2.isRobot, Speed, BlueMarker1CellH, BlueMarker1CellW);
+
 [Center, Left, Right] = GetWallValues(Center, Left, Right);
-Robot.WallHistory (end+1) = [Center.Distance; Left.Distance; Right.Distance];
-if (Center.isWall == true)
-    if(Left.isWall == false) %Left turn based on center wall
-        RobotMoveLeft(Speed, TachoLimit);
-    elseif(Right.isWall == false) %Right turn based on left or center walls
-        RobotMoveRight(Speed, TachoLimit);
-    else %%360 turn
+
+%This section should be altered for the copy over, using Marker2 as the Robot
+if(BlueMarker1CellH < aimedHeight) %If else system aims to get as close to the marker as possible
+    if((Orientation == 1 )&&( Center.isWall == false))
+        RobotMoveForward(Speed);
+    elseif(Orientation == 2)
         RobotTurnAround(Speed, TachoLimit);
+    elseif((Orientation == 3 )&& (Left.isWall == false))
+        RobotMoveLeft( Speed, TachoLimit );
+    elseif(Orientation == 4)
+        RobotTurnAround(Speed, TachoLimit);
+    else
+        disp('Cannot Make movement - BlueMarker1Cell H');
+    end
+elseif (BlueMarker1CellH > aimedHeight)
+    if(Orientation == 1)
+        RobotTurnAround(Speed, TachoLimit);
+    elseif((Orientation == 2) && (Center.isWall == false))
+        RobotMoveForward(Speed);
+    elseif(Orientation == 3)
+        RobotTurnAround(Speed, TachoLimit);
+    elseif((Orientation == 4) && (Right.isWall == false))
+        RobotMoveLeft( Speed, TachoLimit );
+    else
+        disp('Cannot Make movement - BlueMarker1Cell H');
     end
 else
-    RobotMoveForward(Speed);
+    disp('Robot Height Aim Error'); %Debugging check for correct logic
+    disp('Cannot get compare  vals');
 end
+
+if(BlueMarker1CellW < aimedWidth) %If else system aims to get as close to the marker as possible
+    if((Orientation == 1) && (Center.isWall == false))
+        RobotMoveForward(Speed);
+    elseif(Orientation == 2)
+        RobotTurnAround(Speed, TachoLimit);
+    elseif((Orientation == 3) && (Left.isWall == false))
+        RobotMoveLeft( Speed, TachoLimit );
+    elseif(Orientation == 4)
+        RobotTurnAround(Speed, TachoLimit);
+    else
+        disp('Cannot Make movement - BlueMarker1Cell H');
+    end
+elseif (BlueMarker1CellW > aimedWidth)
+    if(Orientation == 1)
+        RobotTurnAround(Speed, TachoLimit);
+    elseif((Orientation == 2) && (Center.isWall == false))
+        RobotMoveForward(Speed);
+    elseif(Orientation == 3)
+        RobotTurnAround(Speed, TachoLimit);
+    elseif((Orientation == 4) && (Right.isWall == false))
+        RobotMoveLeft( Speed, TachoLimit );
+    else
+        disp('Cannot Make movement - BlueMarker1Cell H');
+    end
+else
+    disp('Robot Height Aim Error'); %Debugging check for correct logic
+    disp('Cannot get compare  vals');
 end
+
+end
+
 elseif (BlueMarker2.isRobot == true)
 %this will copy over the code section above
 %I choose to produce the same function twice rather than running a function
@@ -254,7 +308,7 @@ BlueMarkerArray = []; %Clears BlueMarkerArray Before a new call
 [BlueMarkerArray] = GetBlueFrame(BlueMarkerArray);
 
 %Blue Marker set based on position of robot marker - Updates the values
-BlueMarkerArrayPlacement = 1;
+BlueMarkerArrayPlacement = 3;
 copyover = BlueMarkerArray(BlueMarkerArrayPlacement, 1);
 BlueMarker2.Height = copyover;
 BlueMarkerArrayPlacement = BlueMarkerArrayPlacement + 1;
@@ -268,11 +322,13 @@ BlueMarker2CellW = BlueMarker2.Width;
 aimedHeight = 0;
 aimedWidth = 0;
 while(aimedHeight == 0 && aimedWidth == 0)
-Arraysize = size(NamesArray,1);
-for Arraysize = Arraysize:-1:0
-if (RedMarker{NamesArray(Arraysize)}.HasBeenVisited == false)
-checkHeight = RedMarker{NamesArray(Arraysize)}.Height;
-checkWidth = RedMarker{NamesArray(Arraysize)}.Width;
+Arraysize = size(NamesUsed,1);
+for Arraysize = Arraysize:-1:1
+if (RedMarker{NamesUsed(Arraysize)}.HasBeenVisited == false)
+checkHeight = RedMarker{NamesUsed(Arraysize)}.Height;
+checkHeight = cell2mat(checkHeight);
+checkWidth = RedMarker{NamesUsed(Arraysize)}.Width;
+checkWidth = cell2mat(checkWidth);
 if (BlueMarker1CellH > checkHeight)
     answerH = BlueMarker2CellH - checkHeight;
 else
@@ -283,6 +339,7 @@ if (BlueMarker2CellW > checkWidth)
 else
     answerW = checkHeight - BlueMarker2CellW;
 end
+AAnswer = [];
 AAnswer = [AAnswer; answerH answerW]; %Array stores the value of each section before it is compared
 end
 %Skips values that have already been visited
@@ -290,36 +347,87 @@ end
 Closest = min(AAnswer(:));
 [row, column] = find(AAnswer == Closest);
 [MarkerPosArray] = GetFrame(MarkerPosArray);
-Arraysize = size(NamesArray,1);
+Arraysize = size(NamesUsed,1);
 CompArraysize = size(MarkerPosArray);
 CompArraysize = CompArraysize / 2; %%Size is halfed to find only the number of values
 if (Arraysize > CompArraysize)
-    RedMarker{NamesArray(row)}.HasBeenVisited = true; %Removes the closest item if it is covered by the robot and therefore visited
+    RedMarker{NamesUsed(row)}.HasBeenVisited = true; %Removes the closest item if it is covered by the robot and therefore visited
 else
-    aimedHeight = RedMarker{NamesArray(row)}.Height; %Sets the coordsd of the markers to aim for in the movement stage
-    aimedWidth = RedMarker{NamesArray(row)}.Width;
+    aimedHeight = RedMarker{NamesUsed(row)}.Height; %Sets the coords of the markers to aim for in the movement stage
+    aimedWidth = RedMarker{NamesUsed(row)}.Width;
+    aimedHeight = cell2mat(aimedHeight);
+    aimedWidth = cell2mat(aimedWidth);
 end
 end
 
 %Movement stage
+Orientation = ''; %Used to test the movement orientation and return a facing value
+[Orientation] = RobotTestOrientation(BlueMarker1.isRobot, BlueMarker2.isRobot, Speed, BlueMarker2CellH, BlueMarker2CellW);
+
 [Center, Left, Right] = GetWallValues(Center, Left, Right);
-Robot.WallHistory = [Robot.WallHistory; Center.Distance; Left.Distance; Right.Distance];
-if (Center.isWall == true)
-    if(Left.isWall == false) %Left turn based on center wall
-        RobotMoveLeft(Speed, TachoLimit);
-    elseif(Right.isWall == false) %Right turn based on left or center walls
-        RobotMoveRight(Speed, TachoLimit);
-    else %%360 turn
+
+%This section should be altered for the copy over, using Marker2 as the Robot
+if(BlueMarker2CellH < aimedHeight) %If else system aims to get as close to the marker as possible
+    if((Orientation == 1) && (Center.isWall == false))
+        RobotMoveForward(Speed);
+    elseif(Orientation == 2)
         RobotTurnAround(Speed, TachoLimit);
+    elseif((Orientation == 3) && (Left.isWall == false))
+        RobotMoveLeft( Speed, TachoLimit );
+    elseif(Orientation == 4)
+        RobotTurnAround(Speed, TachoLimit);
+    else
+        disp('Cannot Make movement - BlueMarker1Cell H');
+    end
+elseif (BlueMarker2CellH > aimedHeight)
+    if(Orientation == 1)
+        RobotTurnAround(Speed, TachoLimit);
+    elseif((Orientation == 2) && (Center.isWall == false))
+        RobotMoveForward(Speed);
+    elseif(Orientation == 3)
+        RobotTurnAround(Speed, TachoLimit);
+    elseif(Orientation == 4) && (Right.isWall == false)
+        RobotMoveLeft( Speed, TachoLimit);
+    else
+        disp('Cannot Make movement - BlueMarker1Cell H');
     end
 else
-    RobotMoveForward(Speed);
-end
+    disp('Robot Height Aim Error'); %Debugging check for correct logic
+    disp('Cannot get compare  vals');
 end
 
+if(BlueMarker2CellW < aimedWidth) %If else system aims to get as close to the marker as possible
+    if((Orientation == 1 )&&( Center.isWall == false))
+        RobotMoveForward(Speed);
+    elseif(Orientation == 2)
+        RobotTurnAround(Speed, TachoLimit);
+    elseif((Orientation == 3) && (Left.isWall == false))
+        RobotMoveLeft( Speed, TachoLimit );
+    elseif(Orientation == 4)
+        RobotTurnAround(Speed, TachoLimit);
+    else
+        disp('Cannot Make movement - BlueMarker1Cell H');
+    end
+elseif (BlueMarker2CellW > aimedWidth)
+    if(Orientation == 1)
+        RobotTurnAround(Speed, TachoLimit);
+    elseif((Orientation == 2) && (Center.isWall == false))
+        RobotMoveForward(Speed);
+    elseif(Orientation == 3)
+        RobotTurnAround(Speed, TachoLimit);
+    elseif((Orientation == 4) && (Right.isWall == false))
+        RobotMoveLeft( Speed, TachoLimit );
+    else
+        disp('Cannot Make movement - BlueMarker1Cell H');
+    end
+else
+    disp('Robot Height Aim Error'); %Debugging check for correct logic
+    disp('Cannot get compare  vals');
+end
+end
 
 else
     disp('Neither BlueMarker has been set to true');
     disp('Error on line 175 BlueMarker if Statement');
 end
-
+%%Program will end when the Both Blue markers are in the same position
