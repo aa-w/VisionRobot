@@ -226,19 +226,28 @@ else
     aimedHeight = RedMarker{NamesArray(row)}.Height; %Sets the coords of the markers to aim for in the movement stage
     aimedWidth = RedMarker{NamesArray(row)}.Width; %Converts the Redmarker values into the aimed values
     aimedHeight = cell2mat(aimedHeight); %Converts value cells to doubles
-    aimedWidth = cell2mat(aimedWidth);
-end
-end
+    aimedWidth = cell2mat(aimedWidth); %
+end %Closes the if statement
+end %Closes the while loop of aimed height
 
 %Movement stage
 
 Orientation = ''; %Used to test the movement orientation and return a facing value
+%Gets the orientation of robot through small movement in a function
 [Orientation] = RobotTestOrientation(BlueMarker1.isRobot, BlueMarker2.isRobot, Speed, BlueMarker1CellH, BlueMarker1CellW);
 
-[Center, Left, Right] = GetWallValues(Center, Left, Right);
+[Center, Left, Right] = GetWallValues(Center, Left, Right); %runs the function that gets the values of walls surrounding the robot
 
 %This section should be altered for the copy over, using Marker2 as the Robot
 if(BlueMarker1CellH < aimedHeight) %If else system aims to get as close to the marker as possible
+    %Orientation values are stored as:
+    % 1 - Up
+    % 2 - Down
+    % 3 - Left
+    % 4 - Right
+    %These statements test the position of the robot compared to the aimed
+    %marker and the walls surounding it and run movements based on the
+    %outcome
     if((Orientation == 1 )&&( Center.isWall == false))
         RobotMoveForward(Speed);
     elseif(Orientation == 2)
@@ -248,7 +257,7 @@ if(BlueMarker1CellH < aimedHeight) %If else system aims to get as close to the m
     elseif(Orientation == 4)
         RobotTurnAround(Speed, TachoLimit);
     else
-        disp('Cannot Make movement - BlueMarker1Cell H');
+        disp('Cannot Make movement - BlueMarker1Cell H'); %Error catching statement Prints the failure to move in the console
     end
 elseif (BlueMarker1CellH > aimedHeight)
     if(Orientation == 1)
@@ -260,14 +269,16 @@ elseif (BlueMarker1CellH > aimedHeight)
     elseif((Orientation == 4) && (Right.isWall == false))
         RobotMoveLeft( Speed, TachoLimit );
     else
-        disp('Cannot Make movement - BlueMarker1Cell H');
+        disp('Cannot Make movement - BlueMarker1Cell H'); %Error catching statement Prints the failure to move in the console
     end
 else
     disp('Robot Height Aim Error'); %Debugging check for correct logic
     disp('Cannot get compare  vals');
 end
-
-if(BlueMarker1CellW < aimedWidth) %If else system aims to get as close to the marker as possible
+%If else system aims to get as close to the marker as possible
+%marker and the walls surounding it and run movements based on the
+%outcome
+if(BlueMarker1CellW < aimedWidth)
     if((Orientation == 1) && (Center.isWall == false))
         RobotMoveForward(Speed);
     elseif(Orientation == 2)
@@ -299,7 +310,8 @@ end
 end
 
 elseif (BlueMarker2.isRobot == true)
-%this will copy over the code section above
+%%%Runs the same set of commands only using the seond blue marker as the
+%%%robot position, this is faster and still scales fully.
 %I choose to produce the same function twice rather than running a function
 %as it saves the amount of vairables that need to be passed over
 while((BlueMarker1CellH + BlueMarker1CellW) ~= (BlueMarker2CellH + BlueMarker2CellW)) %%this needs to be adjusted
