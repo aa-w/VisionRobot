@@ -175,8 +175,6 @@ BlueMarker1CellW = cell2mat(BlueMarker1.Width);
 BlueMarker2CellH = cell2mat(BlueMarker2.Height);
 BlueMarker2CellW = cell2mat(BlueMarker2.Width);
 
-
-
 if (BlueMarker1.isRobot == true)
 while((BlueMarker1CellH + BlueMarker1CellW) ~= (BlueMarker2CellH + BlueMarker2CellW)) %%this needs to be adjusted
 
@@ -193,7 +191,11 @@ BlueMarker1.Width = copyover;
 BlueMarker1CellH = cell2mat(BlueMarker1.Height);
 BlueMarker1CellW = cell2mat(BlueMarker1.Weight);
 
-%Finding the closest value to the Robot
+%Finding the closest value to the Robot and if that value is covered Mark
+%has been visited sets the next marker to aim for
+aimedHeight = 0;
+aimedWidth = 0;
+while(aimedHeight == 0 && aimedWidth == 0)
 Arraysize = size(NamesArray,1);
 for Arraysize = Arraysize:-1:0
 if (RedMarker{NamesArray(Arraysize)}.HasBeenVisited == false)
@@ -209,13 +211,25 @@ if (BlueMarker1CellW > checkWidth)
 else
     answerW = checkHeight - BlueMarker1CellW;
 end
-AAnswer = [AAnswer; answerH answerW];
+AAnswer = [AAnswer; answerH answerW]; %Array stores the value of each section before it is compared
 end
 %Skips values that have already been visited
 end
 Closest = min(AAnswer(:));
-[row, column] = find(AAnswer == Closest); %%WORK OUT HOW TO RELATE THE VALUES // PLOT VALUES ON THE MAP REAL QUICK?
+[row, column] = find(AAnswer == Closest);
+[MarkerPosArray] = GetFrame(MarkerPosArray);
+Arraysize = size(NamesArray,1);
+CompArraysize = size(MarkerPosArray);
+CompArraysize = CompArraysize / 2; %%Size is halfed to find only the number of values
+if (Arraysize > CompArraysize)
+    RedMarker{NamesArray(row)}.HasBeenVisited = true; %Removes the closest item if it is covered by the robot and therefore visited
+else
+    aimedHeight = RedMarker{NamesArray(row)}.Height; %Sets the coordsd of the markers to aim for in the movement stage
+    aimedWidth = RedMarker{NamesArray(row)}.Width;
+end
+end
 
+%Movement stage
 [Center, Left, Right] = GetWallValues(Center, Left, Right);
 Robot.WallHistory (end+1) = [Center.Distance; Left.Distance; Right.Distance];
 if (Center.isWall == true)
@@ -248,7 +262,46 @@ copyover = BlueMarkerArray(BlueMarkerArrayPlacement, 1);
 BlueMarker2.Width = copyover;
 BlueMarker2CellH = BlueMarker2.Height;
 BlueMarker2CellW = BlueMarker2.Width;
-    
+
+%Finding the closest value to the Robot and if that value is covered Mark
+%has been visited sets the next marker to aim for
+aimedHeight = 0;
+aimedWidth = 0;
+while(aimedHeight == 0 && aimedWidth == 0)
+Arraysize = size(NamesArray,1);
+for Arraysize = Arraysize:-1:0
+if (RedMarker{NamesArray(Arraysize)}.HasBeenVisited == false)
+checkHeight = RedMarker{NamesArray(Arraysize)}.Height;
+checkWidth = RedMarker{NamesArray(Arraysize)}.Width;
+if (BlueMarker1CellH > checkHeight)
+    answerH = BlueMarker2CellH - checkHeight;
+else
+    answerH = checkHeight - BlueMarker2CellH;
+end
+if (BlueMarker2CellW > checkWidth)
+    answerW = BlueMarker2CellW - checkHeight;
+else
+    answerW = checkHeight - BlueMarker2CellW;
+end
+AAnswer = [AAnswer; answerH answerW]; %Array stores the value of each section before it is compared
+end
+%Skips values that have already been visited
+end
+Closest = min(AAnswer(:));
+[row, column] = find(AAnswer == Closest);
+[MarkerPosArray] = GetFrame(MarkerPosArray);
+Arraysize = size(NamesArray,1);
+CompArraysize = size(MarkerPosArray);
+CompArraysize = CompArraysize / 2; %%Size is halfed to find only the number of values
+if (Arraysize > CompArraysize)
+    RedMarker{NamesArray(row)}.HasBeenVisited = true; %Removes the closest item if it is covered by the robot and therefore visited
+else
+    aimedHeight = RedMarker{NamesArray(row)}.Height; %Sets the coordsd of the markers to aim for in the movement stage
+    aimedWidth = RedMarker{NamesArray(row)}.Width;
+end
+end
+
+%Movement stage
 [Center, Left, Right] = GetWallValues(Center, Left, Right);
 Robot.WallHistory = [Robot.WallHistory; Center.Distance; Left.Distance; Right.Distance];
 if (Center.isWall == true)
