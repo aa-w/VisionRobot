@@ -5,7 +5,7 @@ function [Orientation] = RobotTestOrientation(BlueMarker1isRobot, BlueMarker2isR
 BlueMarkerArray = []; %Clears the Array of Values
 [BlueMarkerArray] = GetBlueFrame(BlueMarkerArray);
 Orientation = 5; %Will print error if not set correctly
-%Predefining strings
+%Predefining Values specifically out of the range for error catching
 OrientationH = 5;
 OrientationW = 5;
 ReadVal = 1;
@@ -33,27 +33,28 @@ MotorAC.SpeedRegulation = false; %Speed regulation must be turned off for simult
 MotorAC.ActionAtTachoLimit = 'Brake';
 MotorAC.SendToNXT(); %Instruction set sent to the NXT
 
-CompValH = 0;
+%Predefining Values before operations are made on them
+CompValH = 0; 
 CompValW = 0;
 BlueMarkerArray = []; %Clears the Array of Values
 
-[BlueMarkerArray] = GetBlueFrame(BlueMarkerArray); %Gets the new value
+[BlueMarkerArray] = GetBlueFrame(BlueMarkerArray); %Gets the new value after the robot has moved
 if(BlueMarker1isRobot == true)
     ReadVal = 1; %The robots Array values are based on which marker it is
     CompValH = BlueMarkerArray(ReadVal, 1);
-    ReadVal = ReadVal + 1;
+    ReadVal = ReadVal + 1; %ReadVal increments for the next array value
     CompValW = BlueMarkerArray(ReadVal, 1);
 elseif(BlueMarker2isRobot == true)
     ReadVal = 3; %The robots Array values are based on which marker it is
-    CompValH = BlueMarkerArray(ReadVal, 1);
+    CompValH = BlueMarkerArray(ReadVal, 1); %Values are taken from the array and stored in variables using the key
     ReadVal = ReadVal + 1;
-    CompValW = BlueMarkerArray(ReadVal, 1);
+    CompValW = BlueMarkerArray(ReadVal, 1); %Values are taken from the array and stored in variables using the key
 else
-    disp('RobotTestOrientation Error');
+    disp('RobotTestOrientation Error'); %Error state prints error in the console for debugging
     disp('Neither Marker is set to Robot');
 end
 
-if(CompValH > BlueMarkerCellH)
+if(CompValH > BlueMarkerCellH) %Compares the new value to the old value and set the state based on outcome (Height)
     %Robot is facing up
     CompValH = CompValH - BlueMarkerCellH;
     OrientationH = 1;
@@ -66,7 +67,7 @@ else
     disp('RobotTestOrientation - Could not get Height Direction');
 end
 
-if(CompValW > BlueMarkerCellW)
+if(CompValW > BlueMarkerCellW) %Compares the new value to the old value and set the state based on outcome (Width)
     %Robot is facing Right
     CompValW = CompValW - BlueMarkerCellW;
     OrientationW = 4;
@@ -76,24 +77,24 @@ elseif(BlueMarkerCellW > CompValW)
     OrientationW = 3;
 else
     %Debug Exception
-    disp('RobotTestOrientation - Could not get Width Direction');
+    disp('RobotTestOrientation - Could not get Width Direction'); %Error state prints error in the console for debugging
 end
 
 if(CompValH > CompValW) %The greatest difference in value is set to Orientation
     Orientation = OrientationH;
-elseif(CompValW > CompValH)
+elseif(CompValW > CompValH) %The value with greatest difference is used to hold the value
     Orientation = OrientationW;
 else
     %Recursivley calls the function again in order to get a greater
-    %movement
+    %movement this happens until a decision state is reached
     [Orientation] = RobotTestOrientation(Speed, BlueMarkerCellH, BlueMarkerCellW);
 end
 
 %Returns the Robot back to its postion before
-[MinusSpeed] = ConvertSpeed(Speed);
+[MinusSpeed] = ConvertSpeed(Speed); %Runs the minus speed function to get a value for negative speed
 MotorAC.Power = MinusSpeed;
 MotorAC.TachoLimit = 80;
 MotorAC.SpeedRegulation = false;
-MotorAC.SendToNXT();
+MotorAC.SendToNXT(); %Sends the reducing movement to the robot to return it back to its position
 end
 
