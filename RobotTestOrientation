@@ -1,0 +1,99 @@
+function [Orientation] = RobotTestOrientation(BlueMarker1isRobot, BlueMarker2isRobot, Speed, BlueMarkerCellH, BlueMarkerCellW )
+%ROBOTTESTORIENTATION Summary of this function goes here
+%   Moves the robot foward a small increment in order to test its
+%   position, Movement actions are made from this
+BlueMarkerArray = []; %Clears the Array of Values
+[BlueMarkerArray] = GetBlueFrame(BlueMarkerArray);
+Orientation = 5; %Will print error if not set correctly
+%Predefining strings
+OrientationH = 5;
+OrientationW = 5;
+ReadVal = 1;
+if(BlueMarker1isRobot == true)
+    %The robots Array values are based on which marker it is
+    BlueMarkerCellH = BlueMarkerArray(ReadVal, 1);
+    ReadVal = ReadVal + 1; %Moves the counter to set the next line
+    BlueMarkerCellW = BlueMarkerArray(ReadVal, 1);
+elseif(BlueMarker2isRobot == true)
+    ReadVal = 3; %The robots Array values are based on which marker it is
+    BlueMarkerCellH = BlueMarkerArray(ReadVal, 1); 
+    ReadVal = ReadVal + 1; %Moves the counter to set the next line
+    BlueMarkerCellW = BlueMarkerArray(ReadVal, 1);
+else
+    disp('RobotTestOrientation Error'); %Error Exception handling 
+    disp('Could not set new Values');
+end
+
+%%After positions have been tracked the Rbot makes a small amount of motion
+MotorAC = NXTMotor(); %Motor Object is defined with set vairables for movement
+MotorAC.Port = 'AC'; %Motor ports A and C are called for simultaneously movement
+MotorAC.Power = Speed;
+MotorAC.TachoLimit = 80; %TachoLimit is set to a small amount for a small movement
+MotorAC.SpeedRegulation = false; %Speed regulation must be turned off for simultaneously movement
+MotorAC.ActionAtTachoLimit = 'Brake';
+MotorAC.SendToNXT(); %Instruction set sent to the NXT
+
+CompValH = 0;
+CompValW = 0;
+BlueMarkerArray = []; %Clears the Array of Values
+
+[BlueMarkerArray] = GetBlueFrame(BlueMarkerArray); %Gets the new value
+if(BlueMarker1isRobot == true)
+    ReadVal = 1; %The robots Array values are based on which marker it is
+    CompValH = BlueMarkerArray(ReadVal, 1);
+    ReadVal = ReadVal + 1;
+    CompValW = BlueMarkerArray(ReadVal, 1);
+elseif(BlueMarker2isRobot == true)
+    ReadVal = 3; %The robots Array values are based on which marker it is
+    CompValH = BlueMarkerArray(ReadVal, 1);
+    ReadVal = ReadVal + 1;
+    CompValW = BlueMarkerArray(ReadVal, 1);
+else
+    disp('RobotTestOrientation Error');
+    disp('Neither Marker is set to Robot');
+end
+
+if(CompValH > BlueMarkerCellH)
+    %Robot is facing up
+    CompValH = CompValH - BlueMarkerCellH;
+    OrientationH = 1;
+elseif(BlueMarkerCellH > CompValH)
+    %Robot is facing down
+    CompValH = BlueMarkerCellH - CompValH;
+    OrientationH = 2;
+else
+    %Debug Exception
+    disp('RobotTestOrientation - Could not get Height Direction');
+end
+
+if(CompValW > BlueMarkerCellW)
+    %Robot is facing Right
+    CompValW = CompValW - BlueMarkerCellW;
+    OrientationW = 4;
+elseif(BlueMarkerCellW > CompValW)
+    %Robot is facing Left
+    CompValW = BlueMarkerCellW - CompValW;
+    OrientationW = 3;
+else
+    %Debug Exception
+    disp('RobotTestOrientation - Could not get Width Direction');
+end
+
+if(CompValH > CompValW) %The greatest difference in value is set to Orientation
+    Orientation = OrientationH;
+elseif(CompValW > CompValH)
+    Orientation = OrientationW;
+else
+    %Recursivley calls the function again in order to get a greater
+    %movement
+    [Orientation] = RobotTestOrientation(Speed, BlueMarkerCellH, BlueMarkerCellW);
+end
+
+%Returns the Robot back to its postion before
+[MinusSpeed] = ConvertSpeed(Speed);
+MotorAC.Power = MinusSpeed;
+MotorAC.TachoLimit = 80;
+MotorAC.SpeedRegulation = false;
+MotorAC.SendToNXT();
+end
+
