@@ -1,0 +1,6 @@
+function [ MinusSpeed ] = ConvertSpeed( Speed )
+%CONVERTSPEED Summary of this function goes here
+%Converts the Speed function into a Minus speed when called
+mathCalc = Speed * 2;
+MinusSpeed = Speed - mathCalc;
+end
